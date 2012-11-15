@@ -142,6 +142,7 @@ void huboLoop() {
 	int N2 = 0; // counter 2
 
 	printf("buffLength = %i\n",buffLength);
+	printf("buffLength2 = %i\n",buffLength2);
 
 
         size_t fs;
@@ -175,9 +176,7 @@ void huboLoop() {
 	for( i = 0; i< HUBO_JOINT_COUNT; i++) {
 		for( j = 0; j < buffLength; j++) {
 			H_ref_filter_buff[j].ref[i] = H_ref.ref[i];
-			if( j < buffLength2 ) {
-				H_ref_filter_buff2[j].ref[i] = H_ref.ref[i];
-			}
+			if( j < buffLength2 ) { H_ref_filter_buff2[j].ref[i] = H_ref.ref[i]; }
 			H_ref_filter.ref[i] = H_ref.ref[i];
 			H_ref_buff.ref[i] = H_ref.ref[i];
 		}
@@ -209,7 +208,6 @@ void huboLoop() {
 		r = ach_get( &chan_hubo_ref_filter, &H_ref_filter, sizeof(H_ref_filter), &fs, NULL, ACH_O_LAST );
 		if( ACH_OK == r ) {
 			memcpy(&H_ref_buff, &H_ref_filter, sizeof(H_ref_filter));
-			printf("1");
 		}
 		else if(ACH_OK != r) {
 			if(hubo_debug) {
@@ -222,38 +220,25 @@ void huboLoop() {
 // ---------------[ DO NOT EDIT AVBOE THIS LINE]---------------------------------
 // ------------------------------------------------------------------------------
 		for( i = 0; i < HUBO_JOINT_COUNT; i++) {
-			//H_ref_filter_buff.ref[i] = H_ref_filter_buff.ref[i]*(double)buffLength - H_ref_filter_buff.ref[i] + H_ref_filter.ref[i]; 
-	                //H_ref.ref[i] = H_ref_filter.ref[i]; //H_ref_filter_buff.ref[i]/(double)buffLength;
 			H_ref_filter_buff[N].ref[i] = H_ref_buff.ref[i];
-			
-			if( N <  buffLength ) { 
-				N = N + 1; 
-			}
-			else {
-				N = 0;
-			}
-
  			// Average
 			tmp = 0.0;
-			for(j = 0; j < buffLength; j++) {
-				tmp = tmp + H_ref_filter_buff[j].ref[i]; 
-			}
+			for(j = 0; j < buffLength; j++) { tmp = tmp + H_ref_filter_buff[j].ref[i]; }
 
 			H_ref_filter_buff2[N2].ref[i] = tmp/(double)buffLength;
+			H_ref.ref[i] = tmp/(double)buffLength;
 		
 			tmp = 0.0;	
-			for(j = 0; j < buffLength2; j++) {
-				tmp = tmp + H_ref_filter_buff2[j].ref[i]; 
-			}
+			for(j = 0; j < buffLength2; j++) { tmp = tmp + H_ref_filter_buff2[j].ref[i]; }
 
-			if( N2 <  buffLength2 ) { 
-				N2 = N2 + 1; 
-			}
-			else {
-				N2 = 0;
-			}
 
-			H_ref.ref[i] = tmp/(double)buffLength2;
+//			H_ref.ref[i] = tmp/(double)buffLength2;
+			
+			if( N < (buffLength) ) { N = N + 1; }
+			else {N = 0;}
+
+			if( N2 < (buffLength2) ) { N2 = N2 + 1; }
+			else {N2 = 0;}
 		}
 // ------------------------------------------------------------------------------
 // ---------------[ DO NOT EDIT BELOW THIS LINE]---------------------------------
@@ -262,9 +247,6 @@ void huboLoop() {
                 t.tv_nsec+=interval;
                 tsnorm(&t);
         }
-
-
-	printf("here2\n");
 }
 
 

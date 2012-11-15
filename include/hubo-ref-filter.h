@@ -2,5 +2,5 @@
 #include <stdint.h>
 
 #define HUBO_CHAN_REF_FILTER_NAME "hubo-ref-filter"
-#define buffLength 151
-#define buffLength2 76
+#define buffLength 50
+#define buffLength2 50
